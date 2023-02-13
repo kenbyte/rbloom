@@ -191,14 +191,13 @@ class Bloom:
     def __lt__, __gt__, __le__, __ge__, __eq__, __ne__(self,
                                                        other: Bloom)->bool
 
-    def issubset(self, other: Bloom) -> bool    # self <= other
+    def issubset(self, other: Bloom) -> bool      # self <= other
 
-    def issuperset(self, other: Bloom) -> bool  # self >= other
+    def issuperset(self, other: Bloom) -> bool    # self >= other
 
-    def clear(self)                           # remove all items
+    def clear(self)                               # remove all items
 
-    def copy(self) -> Bloom
-
+    def copy(self) -> Bloom                       # duplicate self
 ```
 
 To prevent death and destruction, the bitwise set operations only work on
