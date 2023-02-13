@@ -1,5 +1,5 @@
 use bitline::BitLine;
-use pyo3::{prelude::*, types::PyTuple};
+use pyo3::{basic::CompareOp, prelude::*, types::PyTuple};
 
 #[pyclass]
 #[derive(Clone)]
@@ -86,6 +86,30 @@ impl Bloom {
         Ok(())
     }
 
+    /// Test whether every element in the bloom may be in other
+    ///
+    /// This can have false positives (return true for a bloom which does not
+    /// contain all items in this set), but it will not return a false negative:
+    /// If this returns false, this set contains an element which is not in other
+    #[pyo3(signature = (other, /))]
+    fn issubset(&self, other: &PyAny) -> PyResult<bool> {
+        self.with_other_as_bloom(other, |other_bloom| {
+            Ok(self.filter.is_subset(&other_bloom.filter))
+        })
+    }
+
+    /// Test whether every element in other may be in self
+    ///
+    /// This can have false positives (return true for a bloom which does not
+    /// contain all items in other), but it will not return a false negative:
+    /// If this returns false, other contains an element which is not in self
+    #[pyo3(signature = (other, /))]
+    fn issuperset(&self, other: &PyAny) -> PyResult<bool> {
+        self.with_other_as_bloom(other, |other_bloom| {
+            Ok(other_bloom.filter.is_subset(&self.filter))
+        })
+    }
+
     fn __contains__(&self, o: &PyAny) -> PyResult<bool> {
         let hash = hash(o, &self.hash_func)?;
         for index in lcg::generate_indexes(hash, self.k, self.filter.len()) {
@@ -94,6 +118,22 @@ impl Bloom {
             }
         }
         Ok(true)
+    }
+
+    /// Return a new set with elements from the set and all others.
+    #[pyo3(signature = (*others))]
+    fn union(&self, others: &PyTuple) -> PyResult<Self> {
+        let mut result = self.clone();
+        result.update(others)?;
+        Ok(result)
+    }
+
+    /// Return a new set with elements common to the set and all others.
+    #[pyo3(signature = (*others))]
+    fn intersection(&self, others: &PyTuple) -> PyResult<Self> {
+        let mut result = self.clone();
+        result.intersection_update(others)?;
+        Ok(result)
     }
 
     fn __or__(&self, py: Python<'_>, other: &Bloom) -> PyResult<Bloom> {
@@ -130,8 +170,8 @@ impl Bloom {
     fn update(&mut self, others: &PyTuple) -> PyResult<()> {
         for other in others.iter() {
             // If the other object is a Bloom, use the bitwise union
-            if other.is_instance_of::<Bloom>()? {
-                self.__ior__(&other.extract()?)?;
+            if let Ok(other) = other.extract::<PyRef<Bloom>>() {
+                self.__ior__(&other)?;
             }
             // Otherwise, iterate over the other object and add each item
             else {
@@ -149,7 +189,7 @@ impl Bloom {
         let mut temp: Option<Self> = None;
         for other in others.iter() {
             // If the other object is a Bloom, use the bitwise intersection
-            if let Ok(other) = other.extract::<Bloom>() {
+            if let Ok(other) = other.extract::<PyRef<Bloom>>() {
                 self.__iand__(&other)?;
             }
             // Otherwise, iterate over the other object and add each item
@@ -188,12 +228,56 @@ impl Bloom {
     fn __bool__(&self) -> bool {
         !self.filter.is_empty()
     }
+
+    fn __richcmp__(&self, other: &Self, op: CompareOp) -> PyResult<bool> {
+        check_compatible(self, other)?;
+        Ok(match op {
+            CompareOp::Eq => self.filter == other.filter,
+            CompareOp::Ne => self.filter != other.filter,
+            CompareOp::Le => self.filter.is_subset(&other.filter),
+            CompareOp::Lt => self.filter.is_strict_subset(&other.filter),
+            CompareOp::Ge => other.filter.is_subset(&self.filter),
+            CompareOp::Gt => other.filter.is_strict_subset(&self.filter),
+        })
+    }
+
+    #[classattr]
+    const __hash__: Option<PyObject> = None;
 }
 
 // Non-python methods
 impl Bloom {
     fn hash_fn_clone(&self, py: Python<'_>) -> Option<PyObject> {
         self.hash_func.as_ref().map(|f| f.clone_ref(py))
+    }
+
+    fn zeroed_clone(&self, py: Python<'_>) -> Bloom {
+        Bloom {
+            filter: BitLine::new(self.filter.len()).unwrap(),
+            k: self.k,
+            hash_func: self.hash_fn_clone(py),
+        }
+    }
+
+    /// Extract other as a bloom, or iterate other, and add all items to a temporary bloom
+    fn with_other_as_bloom<O>(
+        &self,
+        other: &PyAny,
+        f: impl FnOnce(&Bloom) -> PyResult<O>,
+    ) -> PyResult<O> {
+        match other.extract::<PyRef<Bloom>>() {
+            Ok(o) => {
+                check_compatible(self, &o)?;
+                f(&o)
+            }
+            Err(_) => {
+                let mut other_bloom = self.zeroed_clone(other.py());
+                for obj in other.iter()? {
+                    other_bloom.add(obj?)?;
+                }
+                f(&other_bloom)
+            }
+        }
     }
 }
 
@@ -216,9 +300,9 @@ mod bitline {
         Some((q.try_into().ok()?, r.try_into().ok()?))
     }
 
-    #[derive(Clone)]
+    #[derive(Clone, PartialEq, Eq)]
     pub struct BitLine {
-        bits: Vec<Word>,
+        bits: Box<[Word]>,
     }
 
     impl BitLine {
@@ -227,7 +311,7 @@ mod bitline {
                 Some((q, r)) => {
                     let size = if r == 0 { q } else { q + 1 };
                     Ok(Self {
-                        bits: vec![0; size],
+                        bits: vec![0; size].into_boxed_slice(),
                     })
                 }
                 None => Err(PyValueError::new_err("too many bits")),
@@ -262,6 +346,26 @@ mod bitline {
         pub fn is_empty(&self) -> bool {
             self.bits.iter().all(|&word| word == 0)
         }
+
+        pub fn is_subset(&self, other: &BitLine) -> bool {
+            all_pairs(self, other, |lhs, rhs| (lhs | rhs) == rhs)
+        }
+
+        pub fn is_strict_subset(&self, other: &BitLine) -> bool {
+            let mut is_equal = true;
+            let is_subset = all_pairs(self, other, |lhs, rhs| {
+                is_equal &= lhs == rhs;
+                (lhs | rhs) == rhs
+            });
+            is_subset && !is_equal
+        }
+    }
+
+    fn all_pairs(lhs: &BitLine, rhs: &BitLine, mut f: impl FnMut(Word, Word) -> bool) -> bool {
+        lhs.bits
+            .iter()
+            .zip(rhs.bits.iter())
+            .all(move |(&lhs, &rhs)| f(lhs, rhs))
     }
 
     impl std::ops::BitAnd for BitLine {
