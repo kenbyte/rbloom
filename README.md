@@ -138,9 +138,9 @@ thought of as:
 ```python
 class Bloom:
 
-    # expected_items: max number of items to be added to the filter
-    # false_positive_rate: max false positive rate of the filter
-    # hash_func: optional argument, see section "Cryptographic security"
+    # expected_items:  max number of items to be added to the filter
+    # false_positive_rate:  max false positive rate of the filter
+    # hash_func:  optional argument, see section "Cryptographic security"
     def __init__(self, expected_items: int, false_positive_rate: float,
                  hash_func=__builtins__.hash)
 
@@ -152,32 +152,47 @@ class Bloom:
                                                  # given to __init__
 
     @property
-    def approx_items(self) -> float  # estimated number of items in
-                                     # the filter
+    def approx_items(self) -> float    # estimated number of items in
+                                       # the filter
 
-    #                all subsequent methods are
-    # -------- equivalent to the corresponding methods ---------
-    #                 of the built-in set type
+    #                    ALL SUBSEQUENT METHODS ARE
+    #  ==========  EQUIVALENT TO THE CORRESPONDING METHODS  ===========
+    #                     OF THE BUILT-IN SET TYPE
 
     def add(self, object)
 
-    def __contains__(self, object) -> bool    # object in self
+    def __contains__(self, object) -> bool       # object in self
 
-    def __bool__(self) -> bool                # False if empty
+    def __bool__(self) -> bool                   # False if empty
 
-    def __repr__(self) -> str                 # Basic info
+    def __repr__(self) -> str                    # basic info
 
-    def __or__(self, other: Bloom) -> Bloom   # self | other
+    def __or__(self, other: Bloom) -> Bloom      # self | other
 
-    def __ior__(self, other: Bloom)           # self |= other
+    def __ior__(self, other: Bloom)              # self |= other
 
-    def __and__(self, other: Bloom) -> Bloom  # self & other
+    def __and__(self, other: Bloom) -> Bloom     # self & other
 
-    def __iand__(self, other: Bloom)          # self &= other
+    def __iand__(self, other: Bloom)             # self &= other
 
+    # extension of __or__
+    def union(self, *others: Union[Iterable, Bloom]) -> Bloom
+
+    # extension of __ior__
     def update(self, *others: Union[Iterable, Bloom])
 
+    # extension of __and__
+    def intersection(self, *others: Union[Iterable, Bloom]) -> Bloom
+
+    # extension of __iand__
     def intersection_update(self, *others: Union[Iterable, Bloom])
+
+    # these implement <, >, <=, >=, ==, !=
+    def __lt__, __gt__, __le__, __ge__, __eq__, __ne__(self, other: Bloom)
+
+    def issubset(self, other: Bloom) -> bool    # self <= other
+
+    def issuperset(self, other: Bloom) -> bool  # self >= other
 
     def clear(self)                           # remove all items
 
@@ -188,7 +203,8 @@ class Bloom:
 To prevent death and destruction, the bitwise set operations only work on
 filters where all parameters are equal (including the hash functions being
 the exact same object). Because this is a Bloom filter, the `__contains__`
-and `approx_items` methods are probabilistic.
+and `approx_items` methods are probabilistic, as are the methods that
+compare two filters.
 
 ## Cryptographic security
 
