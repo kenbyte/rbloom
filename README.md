@@ -74,10 +74,10 @@ Bloom filter libraries on PyPI?
   blazingly fast. See section [Benchmarks](#benchmarks) for more
   information.
 - **Lightweight:** `rbloom` has no dependencies of its own.
-- **Maintainable:** The entire library fits comfortably in
-  a few hundred lines of code, and it's written in idiomatic Rust. Even
-  if I were to stop maintaining `rbloom` (which I don't intend to), it
-  would be trivially easy for you to fork it and keep it working for you.
+- **Maintainable:** This library is very concise, and it's written
+  in idiomatic Rust. Even if I were to stop maintaining `rbloom` (which I
+  don't intend to), it would be trivially easy for you to fork it and keep
+  it working for you.
 
 I started `rbloom` because I was looking for a simple Bloom filter
 dependency for a project, but the pure Python implementations were too
@@ -85,7 +85,7 @@ slow. The only maintained fast alternative I could find,
 `pybloomfiltermmap3` (which is written in C and is a great
 library), failed to work on recent versions of Python (see below),
 so I felt very uncomfortable using it as a dependency. I also felt like
-the thousands of lines of code in that library were a bit hard to
+the many thousands of lines of code in that library were a bit hard to
 handle should it stop being maintained (which is what happened to the
 original `pybloomfiltermmap`). However, please note that
 `pybloomfiltermmap3` implements persistent filters, while `rbloom`
@@ -204,7 +204,7 @@ To prevent death and destruction, the bitwise set operations only work on
 filters where all parameters are equal (including the hash functions being
 the exact same object). Because this is a Bloom filter, the `__contains__`
 and `approx_items` methods are probabilistic, as are the methods that
-compare two filters (e.g. `__le__` and `__issubset__`).
+compare two filters (such as `__le__` and `__issubset__`).
 
 ## Cryptographic security
 
