@@ -188,7 +188,8 @@ class Bloom:
     def intersection_update(self, *others: Union[Iterable, Bloom])
 
     # these implement <, >, <=, >=, ==, !=
-    def __lt__, __gt__, __le__, __ge__, __eq__, __ne__(self, other: Bloom)
+    def __lt__, __gt__, __le__, __ge__, __eq__, __ne__(self,
+                                                       other: Bloom)->bool
 
     def issubset(self, other: Bloom) -> bool    # self <= other
 
@@ -204,7 +205,7 @@ To prevent death and destruction, the bitwise set operations only work on
 filters where all parameters are equal (including the hash functions being
 the exact same object). Because this is a Bloom filter, the `__contains__`
 and `approx_items` methods are probabilistic, as are the methods that
-compare two filters.
+compare two filters (e.g. `__le__` and `__issubset__`).
 
 ## Cryptographic security
 
