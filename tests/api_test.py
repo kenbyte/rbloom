@@ -35,6 +35,8 @@ def test_bloom(bloom: Bloom):
     assert other == bloom
 
     other.update(str(i).encode()*500 for i in range(100000))
+    for i in range(100000):
+        assert str(i).encode()*500 in other
     assert bloom != other
     assert bloom & other == bloom
     assert bloom | other == other
@@ -83,7 +85,7 @@ def api_suite():
     test_bloom(Bloom(9874124, 0.01, hash_func=sha_based))
     test_bloom(Bloom(2837, 0.5, hash_func=hash))
 
-    print('All API tests passed!')
+    print('All API tests passed')
 
 
 if __name__ == '__main__':
