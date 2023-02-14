@@ -7,7 +7,7 @@ class Bloom:
     # false_positive_rate:  max false positive rate of the filter
     # hash_func:  optional argument, see section "Cryptographic security"
     def __init__(self, expected_items: int, false_positive_rate: float,
-                 hash_func=__builtins__.hash): ...
+                 hash_func=__builtins__.hash) -> None: ...
 
     # number of buckets in the filter
     @property
@@ -26,7 +26,7 @@ class Bloom:
     def load(cls, filepath: str, hash) -> Bloom: ...
 
     # save to file, see section "Persistence"
-    def save(self, filepath: str): ...
+    def save(self, filepath: str) -> None: ...
 
     #####################################################################
     #                    ALL SUBSEQUENT METHODS ARE                     #
@@ -34,7 +34,7 @@ class Bloom:
     #                     OF THE BUILT-IN SET TYPE                      #
     #####################################################################
 
-    def add(self, obj: Any): ...
+    def add(self, obj: Any) -> None: ...
 
     def __contains__(self, obj: Any) -> bool: ...
 
@@ -44,23 +44,23 @@ class Bloom:
 
     def __or__(self, other: Bloom) -> Bloom: ...      # self | other
 
-    def __ior__(self, other: Bloom): ...              # self |= other
+    def __ior__(self, other: Bloom) -> None: ...              # self |= other
 
     def __and__(self, other: Bloom) -> Bloom: ...     # self & other
 
-    def __iand__(self, other: Bloom): ...             # self &= other
+    def __iand__(self, other: Bloom) -> None: ...             # self &= other
 
     # extension of __or__
     def union(self, *others: Union[Iterable, Bloom]) -> Bloom: ...
 
     # extension of __ior__
-    def update(self, *others: Union[Iterable, Bloom]): ...
+    def update(self, *others: Union[Iterable, Bloom]) -> None: ...
 
     # extension of __and__
     def intersection(self, *others: Union[Iterable, Bloom]) -> Bloom: ...
 
     # extension of __iand__
-    def intersection_update(self, *others: Union[Iterable, Bloom]): ...
+    def intersection_update(self, *others: Union[Iterable, Bloom]) -> None: ...
 
     # these implement <, >, <=, >=, ==, !=
     def __lt__(self, other: Bloom) -> bool: ...
@@ -74,6 +74,6 @@ class Bloom:
 
     def issuperset(self, other: Bloom) -> bool: ...    # self >= other
 
-    def clear(self): ...                               # remove all items
+    def clear(self) -> None: ...                               # remove all items
 
     def copy(self) -> Bloom: ...                       # duplicate self
