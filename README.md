@@ -81,16 +81,13 @@ Bloom filter libraries on PyPI?
 
 I started `rbloom` because I was looking for a simple Bloom filter
 dependency for a project, but the pure Python implementations were too
-slow. The only maintained fast alternative I could find,
-`pybloomfiltermmap3` (which is written in C and is a great
-library), failed to work on recent versions of Python (see below),
-so I felt very uncomfortable using it as a dependency. I also felt like
-the many thousands of lines of code in that library were a bit hard to
-handle should it stop being maintained (which is what happened to the
-original `pybloomfiltermmap`). However, please note that
-`pybloomfiltermmap3` implements persistent filters, while `rbloom`
-currently does not, so if that's something you require, you should
-definitely give that library a try.
+slow. The only fast alternative I could find, `pybloomfiltermmap3` (written
+in C), showed undefined behavior on recent versions of Python (see below),
+so I made `rbloom` instead. It ended up being twice as fast and has grown to
+encompass a more complete API (e.g. with set comparisons like `issubset`).
+However, do note that `pybloomfiltermmap3` supports modifying Bloom filter
+files in-place, while `rbloom` only supports reading and writing them from
+scratch, so if you require that functionality, you should use it instead.
 
 ## Benchmarks
 
@@ -117,8 +114,8 @@ This resulted in the following runtimes:
 | [Flor](https://pypi.org/project/Flor/)                             | 128.837s | doesn't work on arbitrary objects [2] |
 | [bloom-filter2](https://pypi.org/project/bloom-filter2/)           | 325.044s | doesn't work on arbitrary objects [2] |
 
-[1] It refused to install on Python 3.11 and kept segfaulting on 3.10, so I
-installed 3.7 on my machine for this benchmark.  
+[1] It refused to install on Python 3.11 and kept segfaulting on 3.10 (on Linux
+as of January 2023), so I installed 3.7 on my machine for this benchmark.  
 [2] I tested both converting to bytes and pickling, and chose the faster time.
 
 The benchmark was run on a 2019 Dell XPS 15 7590 with an Intel Core
@@ -155,6 +152,11 @@ class Bloom:
     @property
     def approx_items(self) -> float    # estimated number of items in
                                        # the filter
+
+    @classmethod
+    def load(cls, filepath: str, hash) -> Bloom # see section "Persistence"
+
+    def save(self, filepath: str)               # see section "Persistence"
 
     #####################################################################
     #                    ALL SUBSEQUENT METHODS ARE                     #
@@ -242,6 +244,28 @@ the scary realm of the unpythonic:
 Making you supply your own hash function in this case is a deliberate
 design decision intended to show you what you're doing and prevent
 you from shooting yourself in the foot.
+
+## Persistence
+
+The `save` and `load` methods allow you to save and load filters to and
+from disk. However, as the built-in hash function's salt changes between
+invocations of Python, they only work on filters with custom hash
+functions. Note that it is your responsibility to ensure that the hash
+function you supply to `load` is the same as the one used by the
+filter you're loading!
+
+```python
+bf = Bloom(10_000, 0.01, some_hash_func)
+bf.add("hello")
+bf.add("world")
+
+bf.save("bf.bloom")
+
+loaded_bf = Bloom.load("bf.bloom", some_hash_func)
+assert loaded_bf == bf
+```
+
+The size of the file is `bf.size_in_bits // 8 + 8` bytes.
 
 ---
 
