@@ -156,9 +156,11 @@ class Bloom:
     def approx_items(self) -> float    # estimated number of items in
                                        # the filter
 
-    #                    ALL SUBSEQUENT METHODS ARE
-    #  ==========  EQUIVALENT TO THE CORRESPONDING METHODS  ===========
-    #                     OF THE BUILT-IN SET TYPE
+    #####################################################################
+    #                    ALL SUBSEQUENT METHODS ARE                     #
+    #              EQUIVALENT TO THE CORRESPONDING METHODS              #
+    #                     OF THE BUILT-IN SET TYPE                      #
+    #####################################################################
 
     def add(self, obj)
 
