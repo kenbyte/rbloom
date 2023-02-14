@@ -85,9 +85,12 @@ slow. The only fast alternative I could find, `pybloomfiltermmap3` (written
 in C), showed undefined behavior on recent versions of Python (see below),
 so I made `rbloom` instead. It ended up being twice as fast and has grown to
 encompass a more complete API (e.g. with set comparisons like `issubset`).
-However, do note that `pybloomfiltermmap3` supports modifying Bloom filter
-files in-place, while `rbloom` only supports reading and writing them from
-scratch, so if you require that functionality, you should use it instead.
+Do note that while `rbloom` only supports reading and writing its Bloom filter
+files in one sweep, `pybloomfiltermmap3` supports modifying them in-place.
+This is of questionable utility in most cases due to the random-access-heavy
+nature of Bloom filters, which causes the entire file to be in memory after
+only a few operations in spite of mmap. If you specifically need this
+functionality, however, you should use `pybloomfiltermmap3`.
 
 ## Benchmarks
 
@@ -232,6 +235,9 @@ the scary realm of the unpythonic:
 Making you supply your own hash function in this case is a deliberate
 design decision intended to show you what you're doing and prevent
 you from shooting yourself in the foot.
+
+Also note that using a custom hash will incur a performance penalty over
+using the built-in hash.
 
 ## Persistence
 
