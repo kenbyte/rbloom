@@ -21,6 +21,13 @@ class Bloom:
     @property
     def approx_items(self) -> float: ...
 
+    # load from file, see section "Persistence"
+    @classmethod
+    def load(cls, filepath: str, hash) -> Bloom: ...
+
+    # save to file, see section "Persistence"
+    def save(self, filepath: str): ...
+
     #####################################################################
     #                    ALL SUBSEQUENT METHODS ARE                     #
     #              EQUIVALENT TO THE CORRESPONDING METHODS              #
