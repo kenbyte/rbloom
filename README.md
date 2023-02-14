@@ -164,12 +164,9 @@ class Bloom:
     #                     OF THE BUILT-IN SET TYPE                      #
     #####################################################################
 
-    def add(self, obj)
-
+    def add(self, obj)                           # add obj to self
     def __contains__(self, obj) -> bool          # check if obj in self
-
     def __bool__(self) -> bool                   # False if empty
-
     def __repr__(self) -> str                    # basic info
 
     def __or__(self, other: Bloom) -> Bloom      # self | other
@@ -177,28 +174,19 @@ class Bloom:
     def __and__(self, other: Bloom) -> Bloom     # self & other
     def __iand__(self, other: Bloom)             # self &= other
 
-    # extension of __or__
-    def union(self, *others: Union[Iterable, Bloom]) -> Bloom
-
-    # extension of __ior__
-    def update(self, *others: Union[Iterable, Bloom])
-
-    # extension of __and__
-    def intersection(self, *others: Union[Iterable, Bloom]) -> Bloom
-
-    # extension of __iand__
-    def intersection_update(self, *others: Union[Iterable, Bloom])
+    # these extend the functionality of __or__, __ior__, __and__, __iand__
+    def union(self, *others: Union[Iterable, Bloom]) -> Bloom        # __or__
+    def update(self, *others: Union[Iterable, Bloom])                # __ior__
+    def intersection(self, *others: Union[Iterable, Bloom]) -> Bloom # __and__
+    def intersection_update(self, *others: Union[Iterable, Bloom])   # __iand__
 
     # these implement <, >, <=, >=, ==, !=
     def __lt__, __gt__, __le__, __ge__, __eq__, __ne__(self,
-                                                       other: Bloom)->bool
-
+                                                       other: Bloom) -> bool
     def issubset(self, other: Bloom) -> bool      # self <= other
-
     def issuperset(self, other: Bloom) -> bool    # self >= other
 
     def clear(self)                               # remove all items
-
     def copy(self) -> Bloom                       # duplicate self
 ```
 
