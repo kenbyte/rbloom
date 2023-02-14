@@ -3,6 +3,7 @@
 from rbloom import Bloom
 from hashlib import sha256
 from pickle import dumps
+import os
 
 
 def test_bloom(bloom: Bloom):
@@ -69,6 +70,22 @@ def test_bloom(bloom: Bloom):
     bloom.intersection_update(other)
     assert bloom == orig
 
+    # TEST PERSISTENCE
+    if not bloom.hash_func is hash:
+        # find a filename that doesn't exist
+        i = 0
+        while os.path.exists(f'UNIT_TEST_{i}.bloom'):
+            i += 1
+        filename = f'test{i}.bloom'
+
+        # save and load
+        bloom.save(filename)
+        bloom2 = Bloom.load(filename, bloom.hash_func)
+        assert bloom == bloom2
+
+        # remove the file
+        os.remove(filename)
+
 
 def sha_based(obj):
     h = sha256(dumps(obj)).digest()
@@ -76,7 +93,7 @@ def sha_based(obj):
 
 
 def api_suite():
-    assert repr(Bloom(27_000, 0.0317)) == "<Bloom size_in_bits=193984 approx_items=0.0>"
+    assert repr(Bloom(27_000, 0.0317)) == "<Bloom size_in_bits=193960 approx_items=0.0>"
     assert Bloom(1140, 0.999).hash_func == hash
     assert Bloom(102, 0.01, hash_func=hash).hash_func is hash
     assert Bloom(103100, 0.51, hash_func=sha_based).hash_func is sha_based
