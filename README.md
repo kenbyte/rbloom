@@ -245,10 +245,9 @@ you from shooting yourself in the foot.
 
 ---
 
-This implementation of a Bloom filter doesn't use multiple hash
-functions, but instead works by redistributing the entropy of a single
-hash over multiple integers by using the single hash as the seed of a
-simple linear congruential generator (LCG). Those integers are then used
-as indexes for the bit array that makes up the filter. The constant used
-for the LCG is one proposed by
-[(L'Ecuyer, 1999)](https://doi.org/10.1090/S0025-5718-99-00996-5).
+**Statement of attribution:** Bloom filters were originally proposed in
+[(Bloom, 1970)](https://doi.org/10.1145/362686.362692). Furthermore, this
+implementation makes use of a constant recommended by
+[(L'Ecuyer, 1999)](https://doi.org/10.1090/S0025-5718-99-00996-5) for
+redistributing the entropy of a single hash over multiple integers using a
+linear congruential generator.
