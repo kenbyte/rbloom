@@ -133,7 +133,8 @@ it yourself.
 ## Documentation
 
 This library defines only one class, the signature of which should be
-thought of as:
+thought of as follows. Note that only the first few methods differ from
+the built-in `set` type:
 
 ```python
 class Bloom:
@@ -159,20 +160,17 @@ class Bloom:
     #  ==========  EQUIVALENT TO THE CORRESPONDING METHODS  ===========
     #                     OF THE BUILT-IN SET TYPE
 
-    def add(self, object)
+    def add(self, obj)
 
-    def __contains__(self, object) -> bool       # object in self
+    def __contains__(self, obj) -> bool          # check if obj in self
 
     def __bool__(self) -> bool                   # False if empty
 
     def __repr__(self) -> str                    # basic info
 
     def __or__(self, other: Bloom) -> Bloom      # self | other
-
     def __ior__(self, other: Bloom)              # self |= other
-
     def __and__(self, other: Bloom) -> Bloom     # self & other
-
     def __iand__(self, other: Bloom)             # self &= other
 
     # extension of __or__
