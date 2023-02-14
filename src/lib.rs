@@ -1,5 +1,9 @@
 use bitline::BitLine;
+use pyo3::exceptions::PyValueError;
+use pyo3::types::PyType;
 use pyo3::{basic::CompareOp, prelude::*, types::PyTuple};
+use std::fs::File;
+use std::io::{Read, Write};
 
 #[pyclass]
 #[derive(Clone)]
@@ -243,6 +247,49 @@ impl Bloom {
 
     #[classattr]
     const __hash__: Option<PyObject> = None;
+
+    #[classmethod]
+    fn load(_cls: &PyType, filepath: &str, hash_func: &PyAny) -> PyResult<Bloom> {
+        // check that the hash_func is callable
+        if !hash_func.is_callable() {
+            return Err(pyo3::exceptions::PyTypeError::new_err(
+                "hash_func must be callable",
+            ));
+        }
+        // check that the hash_func isn't the built-in hash function
+        if hash_func.is(get_builtin_hash_func(hash_func.py())?) {
+            return Err(PyValueError::new_err(
+                "Cannot load a bloom filter that uses the built-in hash function",
+            ));
+        }
+        let hash_func = Some(hash_func.to_object(hash_func.py()));
+
+        let mut file = File::open(filepath)?;
+
+        let mut k_bytes = [0; 8];
+        file.read_exact(&mut k_bytes)?;
+        let k = u64::from_le_bytes(k_bytes);
+
+        let filter = BitLine::load(&mut file)?;
+
+        Ok(Bloom {
+            filter,
+            k,
+            hash_func,
+        })
+    }
+
+    fn save(&self, filepath: &str) -> PyResult<()> {
+        if self.hash_func.is_none() {
+            return Err(PyValueError::new_err(
+                "Cannot save a bloom filter that uses the built-in hash function",
+            ));
+        }
+        let mut file = File::create(filepath)?;
+        file.write_all(&self.k.to_le_bytes())?;
+        self.filter.save(&mut file)?;
+        Ok(())
+    }
 }
 
 // Non-python methods
@@ -281,7 +328,7 @@ impl Bloom {
     }
 }
 
-/// This is a primitive BitVec-like structure that uses a Vec as
+/// This is a primitive BitVec-like structure that uses a Box<[u8]> as
 /// the backing store; it exists here to avoid the need for a dependency
 /// on bitvec and to act as a container around all the bit manipulation.
 /// Indexing is done using u64 to avoid address space issues on 32-bit
@@ -289,8 +336,11 @@ impl Bloom {
 mod bitline {
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
+    use std::fs::File;
+    use std::io::{Read, Write};
 
-    type Word = usize;
+    type Word = u8; // cannot be changed without changing the save/load methods;
+                    // has been tested not to be a performance regression compared to usize
 
     const WORD_BITS: u64 = Word::BITS as u64;
 
@@ -358,6 +408,22 @@ mod bitline {
                 (lhs | rhs) == rhs
             });
             is_subset && !is_equal
+        }
+
+        /// Reads the given file from the current position to the end and
+        /// returns a BitLine containing the data.
+        pub fn load(file: &mut File) -> PyResult<Self> {
+            let mut bits = Vec::new();
+            file.read_to_end(&mut bits)?;
+            Ok(Self {
+                bits: bits.into_boxed_slice(),
+            })
+        }
+
+        /// Writes the BitLine to the given file from the current position.
+        pub fn save(&self, file: &mut File) -> PyResult<()> {
+            file.write_all(&self.bits)?;
+            Ok(())
         }
     }
 
