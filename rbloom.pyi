@@ -44,11 +44,11 @@ class Bloom:
 
     def __or__(self, other: Bloom) -> Bloom: ...      # self | other
 
-    def __ior__(self, other: Bloom) -> None: ...              # self |= other
+    def __ior__(self, other: Bloom) -> None: ...      # self |= other
 
     def __and__(self, other: Bloom) -> Bloom: ...     # self & other
 
-    def __iand__(self, other: Bloom) -> None: ...             # self &= other
+    def __iand__(self, other: Bloom) -> None: ...     # self &= other
 
     # extension of __or__
     def union(self, *others: Union[Iterable, Bloom]) -> Bloom: ...
@@ -74,6 +74,6 @@ class Bloom:
 
     def issuperset(self, other: Bloom) -> bool: ...    # self >= other
 
-    def clear(self) -> None: ...                               # remove all items
+    def clear(self) -> None: ...                       # remove all items
 
     def copy(self) -> Bloom: ...                       # duplicate self
