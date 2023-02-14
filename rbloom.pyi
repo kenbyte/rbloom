@@ -9,24 +9,27 @@ class Bloom:
     def __init__(self, expected_items: int, false_positive_rate: float,
                  hash_func=__builtins__.hash): ...
 
+    # number of buckets in the filter
     @property
-    def size_in_bits(self) -> int: ...  # number of buckets in the filter
+    def size_in_bits(self) -> int: ...
 
+    # retrieve the hash_func given to __init__
     @property
-    def hash_func(self) -> Callable[[Any], int]: ...  # retrieve the hash_func
-    # given to __init__
+    def hash_func(self) -> Callable[[Any], int]: ...
 
+    # estimated number of items in the filter
     @property
-    def approx_items(self) -> float: ...    # estimated number of items in
-    # the filter
+    def approx_items(self) -> float: ...
 
-    #                    ALL SUBSEQUENT METHODS ARE
-    #  ==========  EQUIVALENT TO THE CORRESPONDING METHODS  ===========
-    #                     OF THE BUILT-IN SET TYPE
+    #####################################################################
+    #                    ALL SUBSEQUENT METHODS ARE                     #
+    #              EQUIVALENT TO THE CORRESPONDING METHODS              #
+    #                     OF THE BUILT-IN SET TYPE                      #
+    #####################################################################
 
     def add(self, obj: Any): ...
 
-    def __contains__(self, obj: Any) -> bool: ...       # object in self
+    def __contains__(self, obj: Any) -> bool: ...
 
     def __bool__(self) -> bool: ...                   # False if empty
 
