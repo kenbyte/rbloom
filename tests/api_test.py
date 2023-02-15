@@ -78,13 +78,14 @@ def test_bloom(bloom: Bloom):
             i += 1
         filename = f'test{i}.bloom'
 
-        # save and load
-        bloom.save(filename)
-        bloom2 = Bloom.load(filename, bloom.hash_func)
-        assert bloom == bloom2
-
-        # remove the file
-        os.remove(filename)
+        try:
+            # save and load
+            bloom.save(filename)
+            bloom2 = Bloom.load(filename, bloom.hash_func)
+            assert bloom == bloom2
+        finally:
+            # remove the file
+            os.remove(filename)
 
 
 def sha_based(obj):
