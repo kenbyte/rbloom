@@ -333,26 +333,24 @@ impl Bloom {
 /// on bitvec and to act as a container around all the bit manipulation.
 /// Indexing is done using u64 to avoid address space issues on 32-bit
 /// systems, which would otherwise limit the size to 2^32 bits (512MB).
+/// Using u8 for the backing store simplifies file I/O as well as file
+/// portability across systems, and the performance is equivalent to
+/// using usize, even though the latter is arguably more elegant.
 mod bitline {
     use pyo3::exceptions::PyValueError;
     use pyo3::prelude::*;
     use std::fs::File;
     use std::io::{Read, Write};
 
-    type Word = u8; // cannot be changed without changing the save/load methods;
-                    // has been tested not to be a performance regression compared to usize
-
-    const WORD_BITS: u64 = Word::BITS as u64;
-
     #[inline(always)]
     fn bit_idx(idx: u64) -> Option<(usize, u32)> {
-        let (q, r) = (idx / WORD_BITS, idx % WORD_BITS);
+        let (q, r) = (idx / 8, idx % 8);
         Some((q.try_into().ok()?, r.try_into().ok()?))
     }
 
     #[derive(Clone, PartialEq, Eq)]
     pub struct BitLine {
-        bits: Box<[Word]>,
+        bits: Box<[u8]>,
     }
 
     impl BitLine {
@@ -382,7 +380,7 @@ mod bitline {
 
         /// Returns the number of bits in the BitLine
         pub fn len(&self) -> u64 {
-            self.bits.len() as u64 * WORD_BITS
+            self.bits.len() as u64 * 8
         }
 
         pub fn clear(&mut self) {
@@ -427,7 +425,7 @@ mod bitline {
         }
     }
 
-    fn all_pairs(lhs: &BitLine, rhs: &BitLine, mut f: impl FnMut(Word, Word) -> bool) -> bool {
+    fn all_pairs(lhs: &BitLine, rhs: &BitLine, mut f: impl FnMut(u8, u8) -> bool) -> bool {
         lhs.bits
             .iter()
             .zip(rhs.bits.iter())
