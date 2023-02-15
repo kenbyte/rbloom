@@ -146,20 +146,20 @@ class Bloom:
                  hash_func=__builtins__.hash)
 
     @property
-    def size_in_bits(self) -> int  # number of buckets in the filter
+    def size_in_bits(self) -> int      # number of buckets in the filter
 
     @property
-    def hash_func(self) -> Callable[[Any], int]  # retrieve the hash_func
-                                                 # given to __init__
+    def hash_func(self) -> Callable[[Any], int]   # retrieve the hash_func
+                                                  # given to __init__
 
     @property
     def approx_items(self) -> float    # estimated number of items in
                                        # the filter
 
     @classmethod
-    def load(cls, filepath: str, hash) -> Bloom # see section "Persistence"
+    def load(cls, filepath: str, hash_func) -> Bloom      # see "Persistence"
 
-    def save(self, filepath: str)               # see section "Persistence"
+    def save(self, filepath: str)                 # see section "Persistence"
 
     #####################################################################
     #                    ALL SUBSEQUENT METHODS ARE                     #
@@ -167,15 +167,15 @@ class Bloom:
     #                     OF THE BUILT-IN SET TYPE                      #
     #####################################################################
 
-    def add(self, obj)                           # add obj to self
-    def __contains__(self, obj) -> bool          # check if obj in self
-    def __bool__(self) -> bool                   # False if empty
-    def __repr__(self) -> str                    # basic info
+    def add(self, obj)                            # add obj to self
+    def __contains__(self, obj) -> bool           # check if obj in self
+    def __bool__(self) -> bool                    # False if empty
+    def __repr__(self) -> str                     # basic info
 
-    def __or__(self, other: Bloom) -> Bloom      # self | other
-    def __ior__(self, other: Bloom)              # self |= other
-    def __and__(self, other: Bloom) -> Bloom     # self & other
-    def __iand__(self, other: Bloom)             # self &= other
+    def __or__(self, other: Bloom) -> Bloom       # self | other
+    def __ior__(self, other: Bloom)               # self |= other
+    def __and__(self, other: Bloom) -> Bloom      # self & other
+    def __iand__(self, other: Bloom)              # self &= other
 
     # these extend the functionality of __or__, __ior__, __and__, __iand__
     def union(self, *others: Union[Iterable, Bloom]) -> Bloom        # __or__
