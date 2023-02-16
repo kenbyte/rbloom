@@ -86,11 +86,13 @@ in C), showed undefined behavior on recent versions of Python (see below),
 so I made `rbloom` instead. It ended up being twice as fast and has grown to
 encompass a more complete API (e.g. with set comparisons like `issubset`).
 Do note that while `rbloom` only supports reading and writing its Bloom filter
-files in one sweep, `pybloomfiltermmap3` supports modifying them in-place.
-This is of questionable utility in most cases due to the random-access-heavy
+files in one sweep, `pybloomfiltermmap3` supports modifying them in-place with
+mmap. This is of limited utility in most cases due to the random-access-heavy
 nature of Bloom filters, which causes the entire file to be in memory after
-only a few operations in spite of mmap. If you specifically need this
-functionality, however, you should use `pybloomfiltermmap3`.
+only a few operations in spite of mmap, but does more elegantly utilize the
+disk cache on most operating systems. As a rule of thumb, if you need filters
+larger than your system memory (one gigabyte stores around a billion items
+depending on the false positive rate), you should use `pybloomfiltermmap3`.
 
 ## Benchmarks
 
