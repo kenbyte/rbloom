@@ -34,6 +34,8 @@ False
                               # bf and other_bf
 >>> third_bf = bf.copy()
 ... third_bf.update(other_bf)  # same as above
+>>> bf.issubset(third_bf)  # bf <= third_bf also works
+True
 ```
 
 Unlike BF's in real life, you can have as many of these as you want,
