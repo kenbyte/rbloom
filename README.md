@@ -90,9 +90,10 @@ files in one sweep, `pybloomfiltermmap3` supports modifying them in-place with
 mmap. This is of limited utility in most cases due to the random-access-heavy
 nature of Bloom filters, which causes the entire file to be in memory after
 only a few operations in spite of mmap, but does more elegantly utilize the
-disk cache on most operating systems. As a rule of thumb, if you need filters
-larger than your system memory (one gigabyte stores around a billion items
-depending on the false positive rate), you should use `pybloomfiltermmap3`.
+disk cache on most operating systems. As a rule of thumb, if you need Bloom
+filters larger than your system memory (one gigabyte stores around a billion
+items depending on the false positive rate), you should use
+`pybloomfiltermmap3` or a different type of probabilistic filter.
 
 ## Benchmarks
 
@@ -221,7 +222,7 @@ def hash_func(obj):
     h = sha256(dumps(obj)).digest()
     return int.from_bytes(h[:16], "big") - 2**127
 
-bf = Bloom(100_000_000, 0.01, hash_func=hash_func)
+bf = Bloom(100_000_000, 0.01, hash_func)
 ```
 
 When you throw away Python's built-in hash function and start hashing
