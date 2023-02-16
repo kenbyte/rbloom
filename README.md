@@ -247,8 +247,8 @@ The `save` and `load` methods allow you to save and load filters to and
 from disk. However, as the built-in hash function's salt changes between
 invocations of Python, they only work on filters with custom hash
 functions. Note that it is your responsibility to ensure that the hash
-function you supply to `load` is the same as the one used by the
-filter you're loading!
+function you supply to `load` is the same as the one originally used by
+the filter you're loading!
 
 ```python
 bf = Bloom(10_000, 0.01, some_hash_func)
