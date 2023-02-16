@@ -39,9 +39,6 @@ False
 True
 ```
 
-Unlike BF's in real life, you can have as many of these as you want,
-and they all work well together!
-
 For the full API, see the section [Documentation](#documentation).
 
 ## Installation
@@ -202,7 +199,7 @@ To prevent death and destruction, the bitwise set operations only work on
 filters where all parameters are equal (including the hash functions being
 the exact same object). Because this is a Bloom filter, the `__contains__`
 and `approx_items` methods are probabilistic, as are all the methods that
-compare two filters (such as `__le__` and `__issubset__`).
+compare two filters (such as `__le__` and `issubset`).
 
 ## Cryptographic security
 
