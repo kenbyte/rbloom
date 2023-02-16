@@ -8,9 +8,9 @@ A fast, simple and lightweight
 [Bloom filter](https://en.wikipedia.org/wiki/Bloom_filter) library for
 Python, implemented in Rust. It's designed to be as pythonic as
 possible, mimicking the built-in `set` type where it can, and works with
-any hashable object. While it's a new
-kid on the block (this project was started in 2023), it's also currently
-the fastest kid on the block by a long shot (see the section
+any hashable object. While it's a new kid on the block (this project was
+started in 2023), it's also currently the fastest kid on the block by a
+long shot (see the section
 [Benchmarks](#benchmarks)). Releases are published on
 [PyPI](https://pypi.org/project/rbloom/).
 
@@ -31,11 +31,11 @@ False
 
 ### add some items to other_bf
 
->>> third_bf = bf | other_bf  # third_bf now contains all items in
-                              # bf and other_bf
+>>> third_bf = bf | other_bf    # third_bf now contains all items in
+                                # bf and other_bf
 >>> third_bf = bf.copy()
-... third_bf.update(other_bf)  # same as above
->>> bf.issubset(third_bf)  # bf <= third_bf also works
+... third_bf.update(other_bf)   # same as above
+>>> bf.issubset(third_bf)    # bf <= third_bf also works
 True
 ```
 
