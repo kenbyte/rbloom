@@ -229,7 +229,8 @@ When you throw away Python's built-in hash function and start hashing
 serialized representations of objects, however, you open up a breach into
 the scary realm of the unpythonic:
 
-- Numbers like `2`, `2.0` and `2 + 0j` will suddenly no longer be equal.
+- Numbers like `1`, `1.0`, `1 + 0j` and `True` will suddenly no longer
+  be equal.
 - Instances of classes with custom hashing logic (e.g. to stop
   caches inside instances from affecting their hashes) will suddenly
   display undefined behavior.
@@ -262,7 +263,7 @@ loaded_bf = Bloom.load("bf.bloom", some_hash_func)
 assert loaded_bf == bf
 ```
 
-The size of the file is `bf.size_in_bits // 8 + 8` bytes.
+The size of the file is `bf.size_in_bits / 8 + 8` bytes.
 
 ---
 
